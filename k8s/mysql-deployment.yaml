@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trabawho-mysql
+  namespace: trabawho
+  labels:
+    app: trabawho
+    component: mysql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: trabawho
+      component: mysql
+  template:
+    metadata:
+      labels:
+        app: trabawho
+        component: mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: trabawho-secret
+                  key: MYSQL_ROOT_PASSWORD
+            - name: MYSQL_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: trabawho-config
+                  key: DB_NAME
+          volumeMounts:
+            - name: mysql-storage
+              mountPath: /var/lib/mysql
+          readinessProbe:
+            exec:
+              command: ["mysqladmin", "ping", "-h", "localhost"]
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command: ["mysqladmin", "ping", "-h", "localhost"]
+            initialDelaySeconds: 30
+            periodSeconds: 15
+      volumes:
+        - name: mysql-storage
+          persistentVolumeClaim:
+            claimName: trabawho-mysql-pvc

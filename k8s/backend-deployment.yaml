@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trabawho-backend
+  namespace: trabawho
+  labels:
+    app: trabawho
+    component: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: trabawho
+      component: backend
+  template:
+    metadata:
+      labels:
+        app: trabawho
+        component: backend
+    spec:
+      containers:
+        - name: backend
+          image: trabawho-backend:v1
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5000
+          envFrom:
+            - configMapRef:
+                name: trabawho-config
+          env:
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: trabawho-secret
+                  key: DB_PASSWORD
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: trabawho-secret
+                  key: JWT_SECRET
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 5000
+            initialDelaySeconds: 15
+            periodSeconds: 10

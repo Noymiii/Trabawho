@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: trabawho-backend
+  namespace: trabawho
+  labels:
+    app: trabawho
+    component: backend
+spec:
+  type: ClusterIP
+  selector:
+    app: trabawho
+    component: backend
+  ports:
+    - port: 5000
+      targetPort: 5000
