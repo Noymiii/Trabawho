@@ -26,8 +26,8 @@ export default function Register() {
       await register(fullname, email, password, role);
       navigate('/dashboard');
     } catch (err: unknown) {
-      const error = err as { response?: { data?: { message?: string } } };
-      setError(error.response?.data?.message || 'Registration failed. Please try again.');
+      const e = err as { message?: string };
+      setError(e.message || 'Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -42,7 +42,6 @@ export default function Register() {
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
-        {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-gradient mb-4 shadow-glow-primary">
             <Heart className="h-8 w-8 text-white" fill="white" />
@@ -51,7 +50,6 @@ export default function Register() {
           <p className="text-surface-400 mt-1">Create your account and start matching</p>
         </div>
 
-        {/* Form Card */}
         <div className="card p-8 sm:p-10">
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
@@ -64,7 +62,6 @@ export default function Register() {
               </motion.div>
             )}
 
-            {/* Role Selector */}
             <div>
               <label className="block text-sm font-medium text-surface-300 mb-2">
                 I want to...

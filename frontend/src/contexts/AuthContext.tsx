@@ -1,87 +1,100 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import type { User } from '../types';
-import { authAPI } from '../services/api';
+import type { Session, User } from '@supabase/supabase-js';
+import { supabase } from '../lib/supabase-client';
+
+interface Profile {
+  id: string;
+  fullname: string;
+  role: 'customer' | 'worker' | 'admin';
+  avatar: string | null;
+  created_at: string;
+}
 
 interface AuthContextType {
+  session: Session | null;
   user: User | null;
+  profile: Profile | null;
   token: string | null;
   isLoading: boolean;
+  isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (fullname: string, email: string, password: string, role: string) => Promise<void>;
-  logout: () => void;
-  isAuthenticated: boolean;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(localStorage.getItem('trabawho_token'));
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Check if user is logged in on mount
+  async function fetchProfile(userId: string) {
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+    setProfile(data ?? null);
+  }
+
   useEffect(() => {
-    const initAuth = async () => {
-      const savedToken = localStorage.getItem('trabawho_token');
-      const savedUser = localStorage.getItem('trabawho_user');
-
-      if (savedToken && savedUser) {
-        try {
-          setToken(savedToken);
-          setUser(JSON.parse(savedUser));
-          // Verify token is still valid
-          const res = await authAPI.getMe();
-          setUser(res.data.user);
-          localStorage.setItem('trabawho_user', JSON.stringify(res.data.user));
-        } catch {
-          // Token expired or invalid
-          localStorage.removeItem('trabawho_token');
-          localStorage.removeItem('trabawho_user');
-          setToken(null);
-          setUser(null);
-        }
+    supabase.auth.getSession().then(({ data: { session: s } }) => {
+      setSession(s);
+      setUser(s?.user ?? null);
+      if (s?.user) {
+        fetchProfile(s.user.id).finally(() => setIsLoading(false));
+      } else {
+        setIsLoading(false);
       }
-      setIsLoading(false);
-    };
+    });
 
-    initAuth();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, s) => {
+      setSession(s);
+      setUser(s?.user ?? null);
+      if (s?.user) {
+        fetchProfile(s.user.id);
+      } else {
+        setProfile(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const login = async (email: string, password: string) => {
-    const res = await authAPI.login({ email, password });
-    const { token: newToken, user: newUser } = res.data;
-    localStorage.setItem('trabawho_token', newToken);
-    localStorage.setItem('trabawho_user', JSON.stringify(newUser));
-    setToken(newToken);
-    setUser(newUser);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
   };
 
   const register = async (fullname: string, email: string, password: string, role: string) => {
-    const res = await authAPI.register({ fullname, email, password, role });
-    const { token: newToken, user: newUser } = res.data;
-    localStorage.setItem('trabawho_token', newToken);
-    localStorage.setItem('trabawho_user', JSON.stringify(newUser));
-    setToken(newToken);
-    setUser(newUser);
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { full_name: fullname, role },
+      },
+    });
+    if (error) throw error;
   };
 
-  const logout = () => {
-    localStorage.removeItem('trabawho_token');
-    localStorage.removeItem('trabawho_user');
-    setToken(null);
-    setUser(null);
+  const logout = async () => {
+    await supabase.auth.signOut();
   };
 
   return (
     <AuthContext.Provider
       value={{
+        session,
         user,
-        token,
+        profile,
+        token: session?.access_token ?? null,
         isLoading,
+        isAuthenticated: !!session && !!user,
         login,
         register,
         logout,
-        isAuthenticated: !!token && !!user,
       }}
     >
       {children}

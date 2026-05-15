@@ -23,8 +23,8 @@ export default function Login() {
       await login(email, password);
       navigate('/dashboard');
     } catch (err: unknown) {
-      const error = err as { response?: { data?: { message?: string } } };
-      setError(error.response?.data?.message || 'Invalid email or password');
+      const e = err as { message?: string };
+      setError(e.message || 'Invalid email or password');
     } finally {
       setIsLoading(false);
     }
@@ -39,7 +39,6 @@ export default function Login() {
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
-        {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-gradient mb-4 shadow-glow-primary">
             <Heart className="h-8 w-8 text-white" fill="white" />
@@ -48,7 +47,6 @@ export default function Login() {
           <p className="text-surface-400 mt-1">Sign in to your TRABAWHO account</p>
         </div>
 
-        {/* Form Card */}
         <div className="card p-8 sm:p-10">
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
