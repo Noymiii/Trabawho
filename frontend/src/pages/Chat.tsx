@@ -56,7 +56,32 @@ export default function Chat() {
   useEffect(() => {
     if (!socket) return;
     const handleMessage = (msg: Message) => {
-      if (msg.matchId === activeMatchId) setMessages(prev => [...prev, msg]);
+      // Avoid adding duplicate messages sent by the current user (which are already appended locally in sendMessage)
+      if (msg.matchId === activeMatchId && msg.senderId !== user?.id) {
+        setMessages(prev => [...prev, msg]);
+      }
+
+      // Update conversations sidebar in real-time
+      setConversations(prev => {
+        const index = prev.findIndex(c => c.matchId === msg.matchId);
+        if (index === -1) return prev;
+
+        const updated = [...prev];
+        updated[index] = {
+          ...updated[index],
+          lastMessage: msg,
+          unreadCount: (msg.matchId === activeMatchId || msg.senderId === user?.id)
+            ? updated[index].unreadCount
+            : updated[index].unreadCount + 1,
+        };
+
+        // Sort by the latest message's date
+        return updated.sort((a, b) => {
+          const aTime = a.lastMessage ? new Date(a.lastMessage.createdAt).getTime() : 0;
+          const bTime = b.lastMessage ? new Date(b.lastMessage.createdAt).getTime() : 0;
+          return bTime - aTime;
+        });
+      });
     };
     const handleContractProposed = (contract: Contract) => {
       if (contract.matchId === activeMatchId) {
@@ -109,14 +134,52 @@ export default function Chat() {
     if (!newMessage.trim() || !activeMatchId) return;
     const activeConv = conversations.find(c => c.matchId === activeMatchId);
     if (!activeConv) return;
-    socket?.emit('send-message', {
-      matchId: activeMatchId, receiverId: activeConv.otherUser.id, message: newMessage.trim(),
-    });
-    setMessages(prev => [...prev, {
-      id: Date.now(), senderId: user!.id, receiverId: activeConv.otherUser.id,
-      matchId: activeMatchId, message: newMessage.trim(), isRead: false, createdAt: new Date().toISOString(),
-    }]);
+
+    const messageText = newMessage.trim();
     setNewMessage('');
+
+    // Optimistic UI update
+    const tempId = Date.now();
+    const optimisticMsg = {
+      id: tempId,
+      senderId: user!.id,
+      receiverId: activeConv.otherUser.id,
+      matchId: activeMatchId,
+      message: messageText,
+      isRead: false,
+      createdAt: new Date().toISOString(),
+    };
+
+    setMessages(prev => [...prev, optimisticMsg]);
+    
+    // Update conversations list last message in UI immediately
+    setConversations(prev => {
+      const index = prev.findIndex(c => c.matchId === activeMatchId);
+      if (index === -1) return prev;
+      const updated = [...prev];
+      updated[index] = {
+        ...updated[index],
+        lastMessage: optimisticMsg,
+      };
+      return updated.sort((a, b) => {
+        const aTime = a.lastMessage ? new Date(a.lastMessage.createdAt).getTime() : 0;
+        const bTime = b.lastMessage ? new Date(b.lastMessage.createdAt).getTime() : 0;
+        return bTime - aTime;
+      });
+    });
+
+    try {
+      const res = await messageAPI.send({
+        matchId: activeMatchId,
+        receiverId: activeConv.otherUser.id,
+        message: messageText,
+      });
+      // Replace the optimistic message with the actual saved message from database
+      setMessages(prev => prev.map(m => m.id === tempId ? res.data.message : m));
+    } catch (err) {
+      console.error('Failed to send message:', err);
+      addToast({ type: 'error', title: 'Message failed', message: 'Failed to send your message.' });
+    }
   };
 
   const handleCompleteJob = async () => {

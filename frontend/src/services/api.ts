@@ -86,6 +86,8 @@ export const messageAPI = {
   getByMatch: (matchId: number, page = 1) =>
     api.get(`/messages/${matchId}?page=${page}`),
   getConversations: () => api.get('/messages/conversations'),
+  send: (data: { matchId: number; receiverId: number; message: string }) =>
+    api.post('/messages', data),
 };
 
 // ========== ADMIN ==========

@@ -39,7 +39,8 @@ exports.proposeContract = async (req, res) => {
     // Broadcast socket event
     const io = req.app.get('io');
     if (io) {
-      io.to(`match-${matchId}`).emit('contract-proposed', populatedContract);
+      const receiverId = match.workerId === proposerId ? match.customerId : match.workerId;
+      io.to(`match-${matchId}`).to(`user-${receiverId}`).emit('contract-proposed', populatedContract);
     }
 
     res.status(201).json(populatedContract);
@@ -84,7 +85,8 @@ exports.updateContractStatus = async (req, res) => {
     // Broadcast socket event
     const io = req.app.get('io');
     if (io) {
-      io.to(`match-${contract.matchId}`).emit('contract-updated', {
+      const receiverId = contract.proposerId;
+      io.to(`match-${contract.matchId}`).to(`user-${receiverId}`).emit('contract-updated', {
         id: contract.id,
         matchId: contract.matchId,
         status: contract.status

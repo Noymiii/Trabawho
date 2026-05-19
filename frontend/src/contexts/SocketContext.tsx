@@ -24,7 +24,9 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    const socketUrl = import.meta.env.VITE_SOCKET_URL || window.location.origin;
+    const socketUrl = import.meta.env.VITE_SOCKET_URL || 
+                      import.meta.env.VITE_API_URL?.replace('/api', '') || 
+                      (window.location.hostname === 'localhost' ? 'http://localhost:5001' : window.location.origin);
     const newSocket = io(socketUrl, {
       auth: { token },
       transports: ['websocket', 'polling'],

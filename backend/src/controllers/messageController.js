@@ -66,4 +66,49 @@ const getConversations = async (req, res) => {
   }
 };
 
-module.exports = { getMessagesByMatch, getConversations };
+const sendMessage = async (req, res) => {
+  try {
+    const { matchId, receiverId, message } = req.body;
+    
+    // Verify the match exists and the user is part of it
+    const match = await Match.findByPk(matchId);
+    if (!match) return res.status(404).json({ message: 'Match not found' });
+    if (match.workerId !== req.user.id && match.customerId !== req.user.id) {
+      return res.status(403).json({ message: 'Not your match' });
+    }
+
+    const savedMessage = await Message.create({
+      senderId: req.user.id,
+      receiverId,
+      matchId,
+      message,
+    });
+
+    // Load sender details to match standard messages shape
+    const fullMessage = await Message.findByPk(savedMessage.id, {
+      include: [{ model: User, as: 'sender', attributes: ['id', 'fullname', 'avatar'] }]
+    });
+
+    // Broadcast via socket.io if server has it initialized
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`match-${matchId}`).to(`user-${receiverId}`).emit('message-received', {
+        id: savedMessage.id,
+        senderId: req.user.id,
+        receiverId,
+        matchId,
+        message,
+        isRead: false,
+        createdAt: savedMessage.createdAt,
+        sender: fullMessage.sender,
+      });
+    }
+
+    res.status(201).json({ message: fullMessage });
+  } catch (error) {
+    console.error('Send message error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+module.exports = { getMessagesByMatch, getConversations, sendMessage };

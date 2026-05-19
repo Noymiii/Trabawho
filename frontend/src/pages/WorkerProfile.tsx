@@ -168,7 +168,8 @@ export default function WorkerProfile() {
       
       setIsEditing(false);
       setMessage({ type: 'success', text: 'Profile saved successfully!' });
-    } catch { 
+    } catch (err: any) { 
+      console.error("Profile save error detailed:", err?.response?.data || err);
       setMessage({ type: 'error', text: 'Failed to save profile.' }); 
     } finally { 
       setIsSaving(false); 

@@ -18,6 +18,10 @@ module.exports = (io) => {
   io.on('connection', (socket) => {
     console.log(`User connected: ${socket.userId}`);
 
+    // Join personal user room to receive notifications and messages globally
+    socket.join(`user-${socket.userId}`);
+    console.log(`User ${socket.userId} joined their personal room user-${socket.userId}`);
+
     // Join a match room
     socket.on('join-match', (matchId) => {
       socket.join(`match-${matchId}`);
@@ -35,8 +39,8 @@ module.exports = (io) => {
           message,
         });
 
-        // Broadcast to the match room
-        io.to(`match-${matchId}`).emit('message-received', {
+        // Broadcast to the match room AND the receiver's personal room
+        io.to(`match-${matchId}`).to(`user-${receiverId}`).emit('message-received', {
           id: savedMessage.id,
           senderId: socket.userId,
           receiverId,
