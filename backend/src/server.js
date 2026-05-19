@@ -47,6 +47,11 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// Root welcome endpoint
+app.get('/', (req, res) => {
+  res.json({ message: 'TRABAWHO API is running' });
+});
+
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/workers', workerRoutes);
