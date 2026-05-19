@@ -27,10 +27,20 @@ const allowedOrigins = process.env.FRONTEND_URL
   ? process.env.FRONTEND_URL.split(',').map(url => url.trim())
   : ['http://localhost:3000', 'http://localhost:5173'];
 
+// CORS configuration helper function
+const checkOrigin = (origin, callback) => {
+  const isVercelSubdomain = origin && (origin.endsWith('.vercel.app') || /\.vercel\.app$/.test(origin));
+  if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes('*') || isVercelSubdomain) {
+    callback(null, true);
+  } else {
+    callback(new Error('Not allowed by CORS'));
+  }
+};
+
 // Socket.io setup
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins,
+    origin: checkOrigin,
     methods: ['GET', 'POST'],
     credentials: true,
   },
@@ -39,13 +49,7 @@ app.set('io', io);
 
 // Middleware
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: checkOrigin,
   credentials: true,
 }));
 app.use(express.json());
