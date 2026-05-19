@@ -92,6 +92,9 @@ export interface Conversation {
   otherUser: User;
   lastMessage?: Message;
   unreadCount: number;
+  matchStatus?: 'matched' | 'completed' | 'cancelled';
+  workerId?: number;
+  customerId?: number;
 }
 
 // Admin Stats
@@ -102,4 +105,16 @@ export interface PlatformStats {
   totalJobs: number;
   totalMatches: number;
   activeJobs: number;
+}
+
+// Contract
+export interface Contract {
+  id: number;
+  matchId: number;
+  proposerId: number;
+  price: number;
+  description: string;
+  status: 'pending' | 'accepted' | 'rejected';
+  createdAt: string;
+  proposer?: User;
 }

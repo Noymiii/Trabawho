@@ -9,6 +9,8 @@ import { cn } from '../lib/utils';
 
 type Tab = 'overview' | 'users' | 'jobs' | 'matches';
 
+const easeOut = [0.23, 1, 0.32, 1] as const;
+
 export default function AdminDashboard() {
   const [tab, setTab] = useState<Tab>('overview');
   const [stats, setStats] = useState<PlatformStats | null>(null);
@@ -37,35 +39,37 @@ export default function AdminDashboard() {
   ];
 
   const statCards = stats ? [
-    { label: 'Total Users', value: stats.totalUsers, icon: Users, color: 'from-primary to-secondary' },
-    { label: 'Workers', value: stats.totalWorkers, icon: Users, color: 'from-accent to-accent-dark' },
-    { label: 'Jobs', value: stats.totalJobs, icon: Briefcase, color: 'from-info to-blue-700' },
-    { label: 'Matches', value: stats.totalMatches, icon: Heart, color: 'from-warning to-orange-600' },
+    { label: 'Total Users', value: stats.totalUsers, icon: Users, color: 'bg-primary' },
+    { label: 'Workers', value: stats.totalWorkers, icon: Users, color: 'bg-accent' },
+    { label: 'Jobs', value: stats.totalJobs, icon: Briefcase, color: 'bg-blue-600' },
+    { label: 'Matches', value: stats.totalMatches, icon: Heart, color: 'bg-warning' },
   ] : [];
 
   if (isLoading) return (
-    <div className="min-h-dvh pt-20 flex items-center justify-center">
-      <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full" />
+    <div className="min-h-dvh pt-20 flex items-center justify-center bg-surface-950">
+      <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
     </div>
   );
 
   return (
-    <div className="min-h-dvh pt-20 pb-8 px-4">
+    <div className="min-h-dvh pt-20 pb-8 px-4 bg-surface-950">
       <div className="max-w-6xl mx-auto">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: easeOut }}>
           <div className="mb-6">
-            <h1 className="text-2xl font-bold font-heading flex items-center gap-2">
-              <Shield className="h-6 w-6 text-primary" /> Admin Dashboard
+            <h1 className="text-2xl font-bold font-heading flex items-center gap-2 text-white">
+              <Shield className="h-6 w-6 text-accent" /> Admin Dashboard
             </h1>
-            <p className="text-surface-400 text-sm">Manage platform users, jobs, and matches</p>
+            <p className="text-surface-400 text-sm mt-1">Manage platform users, jobs, and matches</p>
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-1 mb-6 p-1 glass rounded-[var(--radius-md)] w-fit">
+          <div className="flex gap-1 mb-6 p-1 bg-surface-900 rounded-xl w-fit border border-surface-800">
             {tabs.map(t => (
               <button key={t.id} onClick={() => setTab(t.id)}
-                className={cn('px-4 py-2 text-sm font-medium rounded-[var(--radius-sm)] transition-all cursor-pointer',
-                  tab === t.id ? 'gradient-primary text-white' : 'text-surface-400 hover:text-surface-200')}>
+                className={cn('px-4 py-2 text-sm font-medium rounded-lg transition-colors duration-150 cursor-pointer',
+                  tab === t.id ? 'bg-surface-800 shadow-sm text-accent font-semibold' : 'text-surface-400 hover:text-white')}
+                style={{ transitionTimingFunction: 'var(--ease-out)' }}
+              >
                 {t.label}
               </button>
             ))}
@@ -75,16 +79,25 @@ export default function AdminDashboard() {
           {tab === 'overview' && (
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {statCards.map((s, i) => (
-                <motion.div key={s.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }} className="glass rounded-[var(--radius-lg)] p-5">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className={`w-10 h-10 rounded-[var(--radius-md)] bg-gradient-to-br ${s.color} flex items-center justify-center`}>
-                      <s.icon className="h-5 w-5 text-white" />
+                <motion.div key={s.label}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.08, duration: 0.4, ease: easeOut }}
+                  className="card p-5"
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center shadow-sm", 
+                      s.label === 'Total Users' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20' :
+                      s.label === 'Workers' ? 'bg-accent/10 text-accent border border-accent/20' :
+                      s.label === 'Jobs' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
+                      'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                    )}>
+                      <s.icon className="h-5 w-5" />
                     </div>
                     <TrendingUp className="h-4 w-4 text-success" />
                   </div>
-                  <div className="text-3xl font-bold font-heading">{s.value}</div>
-                  <div className="text-sm text-surface-400">{s.label}</div>
+                  <div className="text-3xl font-bold font-heading text-white">{s.value}</div>
+                  <div className="text-sm font-medium text-surface-400 mt-1">{s.label}</div>
                 </motion.div>
               ))}
             </div>
@@ -92,38 +105,44 @@ export default function AdminDashboard() {
 
           {/* Users */}
           {tab === 'users' && (
-            <div className="glass rounded-[var(--radius-lg)] overflow-hidden">
+            <div className="card overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-surface-700/50">
-                      <th className="text-left p-4 text-sm font-medium text-surface-400">Name</th>
-                      <th className="text-left p-4 text-sm font-medium text-surface-400">Email</th>
-                      <th className="text-left p-4 text-sm font-medium text-surface-400">Role</th>
-                      <th className="text-left p-4 text-sm font-medium text-surface-400">Joined</th>
-                      <th className="text-right p-4 text-sm font-medium text-surface-400">Actions</th>
+                    <tr className="border-b border-surface-800 bg-surface-900/40">
+                      <th className="text-left p-4 text-xs font-semibold text-surface-400 uppercase tracking-wider">Name</th>
+                      <th className="text-left p-4 text-xs font-semibold text-surface-400 uppercase tracking-wider">Email</th>
+                      <th className="text-left p-4 text-xs font-semibold text-surface-400 uppercase tracking-wider">Role</th>
+                      <th className="text-left p-4 text-xs font-semibold text-surface-400 uppercase tracking-wider">Joined</th>
+                      <th className="text-right p-4 text-xs font-semibold text-surface-400 uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {users.map(u => (
-                      <tr key={u.id} className="border-b border-surface-800/50 hover:bg-surface-800/30 transition-colors">
+                  <tbody className="divide-y divide-surface-800">
+                    {users.map((u, i) => (
+                      <motion.tr
+                        key={u.id}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.03, duration: 0.3, ease: easeOut }}
+                        className="hover:bg-surface-800 transition-colors duration-150"
+                      >
                         <td className="p-4">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-white text-xs font-bold">{u.fullname[0]}</div>
-                            <span className="text-sm font-medium">{u.fullname}</span>
+                            <div className="w-8 h-8 rounded-full bg-surface-800 border border-surface-700 flex items-center justify-center text-surface-400 text-xs font-bold">{u.fullname[0]?.toUpperCase()}</div>
+                            <span className="text-sm font-semibold text-white">{u.fullname}</span>
                           </div>
                         </td>
                         <td className="p-4 text-sm text-surface-400">{u.email}</td>
                         <td className="p-4"><Badge variant={u.role === 'admin' ? 'danger' : u.role === 'worker' ? 'primary' : 'accent'}>{u.role}</Badge></td>
-                        <td className="p-4 text-sm text-surface-500">{new Date(u.createdAt).toLocaleDateString()}</td>
+                        <td className="p-4 text-sm text-surface-400 font-medium">{new Date(u.createdAt).toLocaleDateString()}</td>
                         <td className="p-4 text-right">
                           {u.role !== 'admin' && (
-                            <Button variant="ghost" size="sm" onClick={() => deleteUser(u.id)} className="text-surface-500 hover:text-danger">
+                            <Button variant="ghost" size="icon" onClick={() => deleteUser(u.id)} className="text-surface-400 hover:text-danger hover:bg-danger/10 h-8 w-8">
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           )}
                         </td>
-                      </tr>
+                      </motion.tr>
                     ))}
                   </tbody>
                 </table>
@@ -131,8 +150,8 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {tab === 'jobs' && <div className="glass rounded-[var(--radius-lg)] p-8 text-center text-surface-400">Job management — coming in next phase</div>}
-          {tab === 'matches' && <div className="glass rounded-[var(--radius-lg)] p-8 text-center text-surface-400">Match monitoring — coming in next phase</div>}
+          {tab === 'jobs' && <div className="card p-12 text-center text-surface-400 font-medium">Job management — coming in next phase</div>}
+          {tab === 'matches' && <div className="card p-12 text-center text-surface-400 font-medium">Match monitoring — coming in next phase</div>}
         </motion.div>
       </div>
     </div>

@@ -12,6 +12,7 @@ const getStats = async (req, res) => {
     ]);
     res.json({ totalUsers, totalWorkers, totalCustomers, totalJobs, totalMatches, activeJobs });
   } catch (error) {
+    console.error('Controller Error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -24,6 +25,7 @@ const getUsers = async (req, res) => {
     });
     res.json({ users });
   } catch (error) {
+    console.error('Controller Error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -37,6 +39,7 @@ const deleteUser = async (req, res) => {
     await user.destroy();
     res.json({ message: 'User deleted' });
   } catch (error) {
+    console.error('Controller Error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -49,6 +52,7 @@ const getAdminJobs = async (req, res) => {
     });
     res.json({ jobs });
   } catch (error) {
+    console.error('Controller Error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -60,6 +64,7 @@ const deleteJob = async (req, res) => {
     await job.destroy();
     res.json({ message: 'Job deleted' });
   } catch (error) {
+    console.error('Controller Error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -76,6 +81,7 @@ const getAdminMatches = async (req, res) => {
     });
     res.json({ matches });
   } catch (error) {
+    console.error('Controller Error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };

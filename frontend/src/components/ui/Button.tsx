@@ -1,31 +1,38 @@
+import React from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../../lib/utils';
 import { Loader2 } from 'lucide-react';
-import type { ButtonHTMLAttributes } from 'react';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 font-medium transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-900',
+  [
+    'inline-flex items-center justify-center gap-2 font-semibold cursor-pointer',
+    'disabled:opacity-50 disabled:cursor-not-allowed',
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-50',
+    'transition-[transform,filter,opacity,background-color,color,border-color]',
+    'duration-200',
+    'active:scale-[0.97]',
+  ].join(' '),
   {
     variants: {
       variant: {
         primary:
-          'bg-primary-gradient text-white hover:opacity-90 active:scale-[0.98] focus-visible:ring-primary shadow-glow-primary',
+          'bg-primary text-white hover:bg-primary/90 focus-visible:ring-primary',
         secondary:
-          'bg-surface-700 text-surface-100 hover:bg-surface-600 active:scale-[0.98] focus-visible:ring-surface-500',
+          'bg-surface-100 text-surface-800 hover:bg-surface-200 focus-visible:ring-surface-400 shadow-sm border border-surface-200',
         accent:
-          'bg-accent text-surface-900 hover:bg-accent-dark active:scale-[0.98] focus-visible:ring-accent',
+          'bg-accent text-white hover:bg-accent/90 focus-visible:ring-accent',
         ghost:
-          'text-surface-300 hover:text-surface-100 hover:bg-surface-800 focus-visible:ring-surface-500',
+          'text-surface-600 hover:text-surface-900 hover:bg-surface-100 focus-visible:ring-surface-400',
         danger:
-          'bg-danger text-white hover:bg-red-600 active:scale-[0.98] focus-visible:ring-danger',
+          'bg-danger text-white hover:opacity-90 focus-visible:ring-danger shadow-sm',
         outline:
-          'border-2 border-primary text-primary hover:bg-primary/10 focus-visible:ring-primary',
+          'border border-card-border text-surface-700 hover:bg-surface-50 hover:border-surface-300 focus-visible:ring-surface-300 shadow-sm',
       },
       size: {
         sm: 'h-9 px-4 text-sm rounded-full',
-        md: 'h-12 px-6 text-sm rounded-full font-bold tracking-wide',
-        lg: 'h-14 px-8 text-base rounded-full font-bold tracking-wide',
-        icon: 'h-12 w-12 rounded-full',
+        md: 'h-11 px-6 text-sm rounded-full tracking-wide',
+        lg: 'h-13 px-8 text-base rounded-full tracking-wide',
+        icon: 'h-11 w-11 rounded-full',
       },
     },
     defaultVariants: {
@@ -36,7 +43,7 @@ const buttonVariants = cva(
 );
 
 interface ButtonProps
-  extends ButtonHTMLAttributes<HTMLButtonElement>,
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   isLoading?: boolean;
 }
@@ -52,12 +59,17 @@ export function Button({
 }: ButtonProps) {
   return (
     <button
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(
+        buttonVariants({ variant, size }),
+        isLoading && 'filter blur-[2px] opacity-70 pointer-events-none',
+        className
+      )}
       disabled={disabled || isLoading}
+      style={{ transitionTimingFunction: 'var(--ease-out)' }}
       {...props}
     >
-      {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-      {children}
+      {isLoading && <Loader2 className="h-4 w-4 animate-spin absolute" />}
+      <span className={cn('flex items-center gap-2', isLoading && 'opacity-0')}>{children}</span>
     </button>
   );
 }

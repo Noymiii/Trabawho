@@ -7,25 +7,26 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   error?: string;
   helperText?: string;
   icon?: React.ReactNode;
+  labelClassName?: string;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, error, helperText, id, icon, ...props }, ref) => {
+  ({ className, label, error, helperText, id, icon, labelClassName, ...props }, ref) => {
     const inputId = id || label?.toLowerCase().replace(/\s+/g, '-');
 
     return (
-      <div className="space-y-1.5 w-full">
+      <div className="space-y-2 w-full">
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-sm font-medium text-surface-300"
+            className={cn("block text-sm font-medium text-surface-700", labelClassName)}
           >
             {label}
           </label>
         )}
         <div className="relative">
           {icon && (
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-surface-500 flex items-center justify-center pointer-events-none">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-surface-400 flex items-center justify-center pointer-events-none">
               {icon}
             </div>
           )}
@@ -33,19 +34,21 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             id={inputId}
             ref={ref}
             className={cn(
-              'w-full h-14 px-5 bg-surface-800 border-2 border-surface-700 rounded-xl text-surface-100 placeholder:text-surface-500 transition-colors duration-200',
-              'focus:outline-none focus:border-primary focus:bg-surface-900',
+              'w-full h-12 px-4 bg-card border border-card-border rounded-2xl text-surface-900 placeholder:text-surface-400',
+              'transition-[border-color,box-shadow] duration-200',
+              'focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30',
               'disabled:opacity-50 disabled:cursor-not-allowed',
-              error && 'border-danger focus:border-danger focus:ring-danger',
-              icon && 'pl-10',
+              error && 'border-danger focus:border-danger focus:ring-danger/30',
+              icon && 'pl-11',
               className
             )}
+            style={{ transitionTimingFunction: 'var(--ease-out)' }}
             {...props}
           />
         </div>
-        {error && <p className="text-sm text-danger">{error}</p>}
+        {error && <p className="text-sm text-danger font-medium">{error}</p>}
         {helperText && !error && (
-          <p className="text-sm text-surface-500">{helperText}</p>
+          <p className="text-sm text-surface-400">{helperText}</p>
         )}
       </div>
     );

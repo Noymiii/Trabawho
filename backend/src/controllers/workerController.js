@@ -24,6 +24,7 @@ const getProfile = async (req, res) => {
     if (!profile) return res.status(404).json({ message: 'Profile not found' });
     res.json({ profile });
   } catch (error) {
+    console.error('Controller Error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -34,12 +35,13 @@ const createProfile = async (req, res) => {
     const existing = await WorkerProfile.findOne({ where: { userId: req.user.id } });
     if (existing) return res.status(400).json({ message: 'Profile already exists' });
 
-    const { skills, bio, experience, location, availability, contactInfo, hourlyRate } = req.body;
+    const { skills, bio, experience, location, availability, contactInfo, hourlyRate, images } = req.body;
     const profile = await WorkerProfile.create({
       userId: req.user.id,
       skills: typeof skills === 'string' ? JSON.parse(skills) : skills,
       bio, experience, location, availability, contactInfo,
       hourlyRate: hourlyRate ? parseFloat(hourlyRate) : null,
+      images: typeof images === 'string' ? JSON.parse(images) : (images || []),
     });
 
     res.status(201).json({ profile });
@@ -55,7 +57,7 @@ const updateProfile = async (req, res) => {
     const profile = await WorkerProfile.findOne({ where: { userId: req.user.id } });
     if (!profile) return res.status(404).json({ message: 'Profile not found' });
 
-    const { skills, bio, experience, location, availability, contactInfo, hourlyRate } = req.body;
+    const { skills, bio, experience, location, availability, contactInfo, hourlyRate, images } = req.body;
     await profile.update({
       skills: skills ? (typeof skills === 'string' ? JSON.parse(skills) : skills) : profile.skills,
       bio: bio ?? profile.bio,
@@ -64,6 +66,7 @@ const updateProfile = async (req, res) => {
       availability: availability ?? profile.availability,
       contactInfo: contactInfo ?? profile.contactInfo,
       hourlyRate: hourlyRate ? parseFloat(hourlyRate) : profile.hourlyRate,
+      images: images ? (typeof images === 'string' ? JSON.parse(images) : images) : profile.images,
     });
 
     res.json({ profile });
@@ -83,6 +86,7 @@ const getAllWorkers = async (req, res) => {
     });
     res.json({ workers: profiles });
   } catch (error) {
+    console.error('Controller Error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };

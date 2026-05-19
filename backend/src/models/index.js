@@ -20,6 +20,7 @@ const WorkerProfile = sequelize.define('WorkerProfile', {
   availability: { type: DataTypes.ENUM('available', 'busy', 'offline'), defaultValue: 'available' },
   contactInfo: { type: DataTypes.STRING, allowNull: true, field: 'contact_info' },
   hourlyRate: { type: DataTypes.DECIMAL(10, 2), allowNull: true, field: 'hourly_rate' },
+  images: { type: DataTypes.JSON, allowNull: true, defaultValue: [] },
 }, { tableName: 'worker_profiles', timestamps: true });
 
 const Job = sequelize.define('Job', {
@@ -32,6 +33,7 @@ const Job = sequelize.define('Job', {
   location: { type: DataTypes.STRING, allowNull: true },
   schedule: { type: DataTypes.STRING, allowNull: true },
   status: { type: DataTypes.ENUM('open', 'matched', 'completed', 'cancelled'), defaultValue: 'open' },
+  images: { type: DataTypes.JSON, allowNull: true, defaultValue: [] },
 }, { tableName: 'jobs', timestamps: true });
 
 const Swipe = sequelize.define('Swipe', {
@@ -59,6 +61,17 @@ const Message = sequelize.define('Message', {
   isRead: { type: DataTypes.BOOLEAN, defaultValue: false, field: 'is_read' },
 }, { tableName: 'messages', timestamps: true });
 
+const Review = sequelize.define('Review', {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  reviewerId: { type: DataTypes.INTEGER, allowNull: false, field: 'reviewer_id' },
+  revieweeId: { type: DataTypes.INTEGER, allowNull: false, field: 'reviewee_id' },
+  matchId: { type: DataTypes.INTEGER, allowNull: false, field: 'match_id' },
+  rating: { type: DataTypes.INTEGER, allowNull: false, validate: { min: 1, max: 5 } },
+  comment: { type: DataTypes.TEXT, allowNull: true },
+}, { tableName: 'reviews', timestamps: true });
+
+const Contract = require('./contract');
+
 // ========== ASSOCIATIONS ==========
 User.hasOne(WorkerProfile, { foreignKey: 'user_id', as: 'profile' });
 WorkerProfile.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
@@ -77,4 +90,15 @@ Message.belongsTo(User, { foreignKey: 'receiver_id', as: 'receiver' });
 Message.belongsTo(Match, { foreignKey: 'match_id', as: 'match' });
 Match.hasMany(Message, { foreignKey: 'match_id', as: 'messages' });
 
-module.exports = { User, WorkerProfile, Job, Swipe, Match, Message };
+Review.belongsTo(User, { foreignKey: 'reviewer_id', as: 'reviewer' });
+Review.belongsTo(User, { foreignKey: 'reviewee_id', as: 'reviewee' });
+Review.belongsTo(Match, { foreignKey: 'match_id', as: 'match' });
+User.hasMany(Review, { foreignKey: 'reviewee_id', as: 'reviewsReceived' });
+User.hasMany(Review, { foreignKey: 'reviewer_id', as: 'reviewsGiven' });
+Match.hasOne(Review, { foreignKey: 'match_id', as: 'review' });
+
+Match.hasMany(Contract, { foreignKey: 'match_id', as: 'contracts' });
+Contract.belongsTo(Match, { foreignKey: 'match_id', as: 'match' });
+Contract.belongsTo(User, { foreignKey: 'proposer_id', as: 'proposer' });
+
+module.exports = { User, WorkerProfile, Job, Swipe, Match, Message, Review, Contract };

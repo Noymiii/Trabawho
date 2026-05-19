@@ -82,6 +82,13 @@ const getQueue = async (req, res) => {
     let queue = [];
 
     if (req.user.role === 'customer') {
+      // Find open jobs owned by this customer
+      const customerJobs = await Job.findAll({
+        where: { customerId: userId, status: 'open' },
+        attributes: ['skillRequired']
+      });
+      const requiredSkills = customerJobs.map(j => j.skillRequired).filter(Boolean);
+
       // Customers see available workers they haven't swiped on
       const workers = await WorkerProfile.findAll({
         where: {
@@ -89,10 +96,18 @@ const getQueue = async (req, res) => {
           availability: 'available',
         },
         include: [{ model: User, as: 'user', attributes: ['id', 'fullname', 'email', 'avatar'] }],
-        limit: 20,
       });
 
-      queue = workers.map(w => ({
+      // Filter workers by matching skills if the customer has open jobs specifying skills
+      let filteredWorkers = workers;
+      if (requiredSkills.length > 0) {
+        filteredWorkers = workers.filter(w => {
+          const workerSkills = Array.isArray(w.skills) ? w.skills : [];
+          return workerSkills.some(skill => requiredSkills.includes(skill));
+        });
+      }
+
+      queue = filteredWorkers.slice(0, 20).map(w => ({
         id: w.userId,
         type: 'worker',
         title: w.user.fullname,
@@ -101,8 +116,15 @@ const getQueue = async (req, res) => {
         tags: w.skills || [],
         location: w.location,
         availability: w.availability,
+        images: w.images || [],
       }));
     } else {
+      // Find worker profile
+      const workerProfile = await WorkerProfile.findOne({
+        where: { userId }
+      });
+      const workerSkills = workerProfile?.skills || [];
+
       // Workers see open jobs they haven't swiped on
       const jobs = await Job.findAll({
         where: {
@@ -111,11 +133,16 @@ const getQueue = async (req, res) => {
           status: 'open',
         },
         include: [{ model: User, as: 'customer', attributes: ['id', 'fullname', 'avatar'] }],
-        limit: 20,
         order: [['createdAt', 'DESC']],
       });
 
-      queue = jobs.map(j => ({
+      // Filter jobs by matching skills if the worker profile has skills specified
+      let filteredJobs = jobs;
+      if (workerSkills && workerSkills.length > 0) {
+        filteredJobs = jobs.filter(j => workerSkills.includes(j.skillRequired));
+      }
+
+      queue = filteredJobs.slice(0, 20).map(j => ({
         id: j.id,
         type: 'job',
         title: j.title,
@@ -124,6 +151,7 @@ const getQueue = async (req, res) => {
         tags: j.skillRequired ? [j.skillRequired] : [],
         location: j.location,
         budget: j.budget ? parseFloat(j.budget) : undefined,
+        images: j.images || [],
       }));
     }
 

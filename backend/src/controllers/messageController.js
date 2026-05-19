@@ -36,7 +36,7 @@ const getConversations = async (req, res) => {
     const matches = await Match.findAll({
       where: {
         [Op.or]: [{ workerId: userId }, { customerId: userId }],
-        status: 'matched',
+        status: { [Op.in]: ['matched', 'completed'] },
       },
       include: [
         { model: User, as: 'worker', attributes: ['id', 'fullname', 'email', 'avatar', 'role'] },
@@ -55,7 +55,7 @@ const getConversations = async (req, res) => {
         const unreadCount = await Message.count({
           where: { matchId: match.id, receiverId: userId, isRead: false },
         });
-        return { matchId: match.id, otherUser, lastMessage, unreadCount };
+        return { matchId: match.id, otherUser, lastMessage, unreadCount, matchStatus: match.status, workerId: match.workerId, customerId: match.customerId };
       })
     );
 

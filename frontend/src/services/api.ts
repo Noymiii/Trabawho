@@ -96,4 +96,21 @@ export const adminAPI = {
   getMatches: () => api.get('/admin/matches'),
 };
 
+// ========== REVIEWS ==========
+export const reviewAPI = {
+  submitReview: (data: { workerId: number; rating: number; comment?: string }) =>
+    api.post('/reviews', data),
+  getUserReviews: (userId: number) => api.get(`/reviews/user/${userId}`),
+};
+
+// ========== CONTRACTS ==========
+export const contractAPI = {
+  propose: (data: { matchId: number; price: number; description: string }) =>
+    api.post('/contracts', data),
+  updateStatus: (id: number, status: 'accepted' | 'rejected') =>
+    api.put(`/contracts/${id}`, { status }),
+  getByMatch: (matchId: number) =>
+    api.get(`/contracts/match/${matchId}`),
+};
+
 export default api;

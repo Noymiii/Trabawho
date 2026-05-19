@@ -1,253 +1,265 @@
+import { useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { motion } from 'framer-motion';
-import {
-  Heart,
-  ArrowRight,
-  Briefcase,
-  Users,
-  MessageCircle,
-  Zap
-} from 'lucide-react';
+import { ArrowRight, Users, MessageCircle, Briefcase, Zap } from 'lucide-react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-const features = [
-  {
-    icon: Zap,
-    title: 'Swipe to Match',
-    description: 'Browse workers or jobs with a fast, fun swipe interface inspired by modern matching apps.',
-  },
-  {
-    icon: Users,
-    title: 'Skill-Based Matching',
-    description: 'Find the perfect match based on skills, experience, location, and availability.',
-  },
-  {
-    icon: MessageCircle,
-    title: 'Instant Chat',
-    description: 'Once matched, communicate directly through our built-in messaging system.',
-  },
-  {
-    icon: Briefcase,
-    title: 'Post & Discover Jobs',
-    description: 'Customers post tasks, workers discover opportunities — simple and efficient.',
-  },
+gsap.registerPlugin(ScrollTrigger);
+
+const easeOut = [0.23, 1, 0.32, 1] as const;
+
+const heroStagger = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.12, delayChildren: 0.3 } },
+};
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 40 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.9, ease: easeOut } },
+};
+
+const images = [
+  'https://picsum.photos/seed/trabawho-hero/1920/1080',
+  'https://picsum.photos/seed/trabawho-work/800/800',
+  'https://picsum.photos/seed/trabawho-connect/800/800',
 ];
 
-const steps = [
-  { step: '01', title: 'Create Your Profile', desc: 'Sign up as a worker or customer in seconds.' },
-  { step: '02', title: 'Browse & Swipe', desc: 'Discover jobs or talented workers with a swipe.' },
-  { step: '03', title: 'Get Matched', desc: 'Mutual interest? It\'s a match! Start chatting.' },
-];
+import { TeaserSwiper } from '../components/swipe/TeaserSwiper';
 
 export default function Landing() {
   const navigate = useNavigate();
+  const scrubRef = useRef<HTMLDivElement>(null);
+
+  // GSAP: Scrubbing Text Reveal
+  useEffect(() => {
+    if (!scrubRef.current) return;
+    const words = scrubRef.current.querySelectorAll('.scrub-word');
+    gsap.set(words, { opacity: 0.1 });
+
+    gsap.to(words, {
+      opacity: 1,
+      stagger: 0.15,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: scrubRef.current,
+        start: 'top 70%',
+        end: 'bottom 40%',
+        scrub: 1,
+      },
+    });
+
+    return () => ScrollTrigger.getAll().forEach(t => t.kill());
+  }, []);
+
+  const scrubText = "We built the fastest way to connect skilled workers with people who need them. No job boards. No endless scrolling. Just swipe, match, and get to work.";
+  const scrubWords = scrubText.split(' ');
 
   return (
-    <div className="min-h-dvh">
-      {/* Hero Section */}
-      <section className="relative min-h-[90dvh] flex items-center justify-center overflow-hidden pt-20 pb-16 bg-surface-900">
-        {/* Clean subtle background accents */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[100px] pointer-events-none" />
+    <main className="overflow-x-hidden w-full max-w-full bg-surface-50 text-surface-950 font-sans">
+      
+      {/* ─── ATTENTION: Cinematic Center Hero ─── */}
+      <section className="relative min-h-[100dvh] flex flex-col items-center justify-center text-center px-6 py-16 md:py-32">
+        {/* Background wash */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ 
+            backgroundImage: `url(${images[0]})`,
+            filter: 'grayscale(100%) contrast(125%) brightness(30%)',
+          }} 
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-surface-950/60 via-surface-950/40 to-surface-50" />
 
-        <div className="relative z-10 max-w-7xl mx-auto px-6 w-full">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
-            {/* Left Content */}
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, ease: 'easeOut' }}
-              className="max-w-2xl"
-            >
-              <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-surface-800 border border-surface-700 mb-8 shadow-sm">
-                <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse"></span>
-                <span className="text-sm text-surface-200 font-medium tracking-wide">The future of local work</span>
-              </div>
-
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold font-heading leading-[1.1] mb-6 tracking-tight">
-                Match with the perfect <br />
-                <span className="gradient-text">skills & talent.</span>
-              </h1>
-
-              <p className="text-lg sm:text-xl text-surface-400 mb-10 leading-relaxed font-light">
-                TRABAWHO connects skilled professionals with customers effortlessly.
-                Experience a premium, intuitive swipe-to-match workflow built for the modern gig economy.
-              </p>
-
-              <div className="flex flex-col sm:flex-row items-center gap-4">
-                <Button
-                  size="lg"
-                  onClick={() => navigate('/register')}
-                  className="w-full sm:w-auto text-base shadow-glow-primary hover:scale-105 transition-transform"
-                >
-                  Start Matching
-                  <ArrowRight className="h-5 w-5 ml-2" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  onClick={() => navigate('/login')}
-                  className="w-full sm:w-auto text-base bg-surface-900/50 backdrop-blur-md hover:bg-surface-800"
-                >
-                  Sign In
-                </Button>
-              </div>
-
-              {/* Stats */}
-              <div className="mt-12 pt-10 border-t border-surface-800/50 grid grid-cols-3 gap-6">
-                {[
-                  { value: '5K+', label: 'Active Workers' },
-                  { value: '98%', label: 'Match Rate' },
-                  { value: '24/7', label: 'Instant Chat' },
-                ].map((stat) => (
-                  <div key={stat.label}>
-                    <div className="text-2xl font-bold text-surface-100 font-heading mb-1">{stat.value}</div>
-                    <div className="text-xs text-surface-500 uppercase tracking-wider font-semibold">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Right Hero Image */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, filter: 'blur(10px)' }}
-              animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-              transition={{ duration: 1, delay: 0.2, ease: 'easeOut' }}
-              className="relative hidden lg:block"
-            >
-              <div className="relative card p-2 transform rotate-1 hover:rotate-0 transition-transform duration-500 bg-white">
-                <img 
-                  src="/hero.png" 
-                  alt="Skilled workers collaborating" 
-                  className="w-full h-auto rounded-[1.5rem] object-cover shadow-inner opacity-90 hover:opacity-100 transition-opacity"
-                />
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-24 px-4">
-        <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl sm:text-4xl font-bold font-heading mb-4">
-              Why <span className="gradient-text">TRABAWHO</span>?
-            </h2>
-            <p className="text-surface-400 max-w-xl mx-auto">
-              A modern approach to connecting talent with opportunity.
-            </p>
-          </motion.div>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {features.map((feature, i) => (
-              <motion.div
-                key={feature.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ delay: i * 0.1, duration: 0.5 }}
-                className="relative card group hover:border-primary/50 transition-colors duration-300"
-              >
-                <div className="h-full p-8 flex flex-col items-center text-center">
-                  <div className="w-14 h-14 rounded-2xl bg-surface-800 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300 shadow-sm">
-                    <feature.icon className="h-6 w-6 text-primary group-hover:text-white transition-colors" />
-                  </div>
-                  <h3 className="text-xl font-bold font-heading mb-3 text-surface-100">{feature.title}</h3>
-                  <p className="text-surface-400 leading-relaxed">{feature.description}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section className="py-24 px-4 bg-surface-800/30">
-        <div className="max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-3xl sm:text-4xl font-bold font-heading mb-4">
-              How It <span className="gradient-text">Works</span>
-            </h2>
-          </motion.div>
-
-          <div className="space-y-8">
-            {steps.map((step, i) => (
-              <motion.div
-                key={step.step}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ delay: i * 0.15, duration: 0.5 }}
-                className="card p-8 flex flex-col sm:flex-row items-start sm:items-center gap-6 relative overflow-hidden group hover:border-primary/30 transition-colors"
-              >
-                <div className="absolute -left-10 -top-10 text-[120px] font-black font-heading text-surface-800 group-hover:text-surface-800/80 transition-colors select-none pointer-events-none">
-                  {step.step}
-                </div>
-                <div className="relative z-10 flex-shrink-0 w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center font-bold text-lg shadow-glow-primary">
-                  {step.step}
-                </div>
-                <div className="relative z-10">
-                  <h3 className="text-xl font-bold font-heading mb-2 text-surface-100">{step.title}</h3>
-                  <p className="text-surface-400">{step.desc}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-24 px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="max-w-4xl mx-auto text-center card p-12 sm:p-20 relative overflow-hidden bg-primary-gradient"
+        <motion.div 
+          className="relative z-10 w-full max-w-6xl mx-auto"
+          variants={heroStagger}
+          initial="hidden"
+          animate="show"
         >
-          <div className="absolute inset-0 bg-[url('/hero.png')] bg-cover bg-center opacity-10 mix-blend-overlay" />
+          <motion.h1 
+            variants={fadeUp}
+            className="text-[clamp(3.5rem,8vw,8rem)] font-extrabold font-heading leading-[0.9] tracking-tighter text-white text-balance mb-10"
+          >
+            Find skilled{' '}
+            <span 
+              className="hidden sm:inline-block w-20 md:w-36 h-[clamp(2rem,4vw,4rem)] rounded-full align-middle bg-cover bg-center mx-2 border border-white/20"
+              style={{ backgroundImage: `url(${images[1]})`, filter: 'grayscale(80%) contrast(110%)' }}
+            />
+            {' '}workers fast.
+          </motion.h1>
           
-          <div className="relative z-10">
-            <h2 className="text-4xl sm:text-5xl font-bold font-heading mb-6 tracking-tight text-white">
-              Ready to find your match?
-            </h2>
-            <p className="text-lg text-white/80 mb-10 max-w-xl mx-auto leading-relaxed">
-              Join thousands of professionals and customers already connecting through TRABAWHO. 
-              The next great opportunity is just a swipe away.
-            </p>
-            <Button size="lg" onClick={() => navigate('/register')} className="bg-white text-primary hover:bg-surface-100 text-base px-8 hover:scale-105 transition-transform shadow-lg">
-              Create Your Account Now
-              <ArrowRight className="h-5 w-5 ml-2" />
+          <motion.p variants={fadeUp} className="text-lg md:text-xl text-white/60 max-w-[55ch] mx-auto mb-14 leading-relaxed text-pretty">
+            The high-agency platform for Metro Manila. Swipe to match with professionals, message directly, hire instantly.
+          </motion.p>
+          
+          <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Button 
+              size="lg" 
+              onClick={() => navigate('/register')} 
+              className="h-14 px-10 text-base bg-white text-surface-950 hover:bg-surface-100 shadow-float"
+            >
+              Start Matching <ArrowRight className="h-5 w-5 ml-2" />
             </Button>
-          </div>
+            <Button 
+              variant="outline" 
+              size="lg" 
+              onClick={() => navigate('/login')}
+              className="h-14 px-10 text-base border-white/20 text-white hover:bg-white/10"
+            >
+              Sign In
+            </Button>
+          </motion.div>
         </motion.div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-8 px-4 border-t border-surface-800">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-primary-gradient flex items-center justify-center">
-              <Heart className="h-4 w-4 text-white" fill="white" />
-            </div>
-            <span className="font-heading font-bold text-surface-100">TRABAWHO</span>
+      {/* ─── INTEREST: Infinite Marquee ─── */}
+      <section className="py-10 border-y border-card-border overflow-hidden bg-white select-none">
+        <div className="relative flex overflow-hidden">
+          <div className="flex shrink-0 gap-16 animate-marquee">
+            {Array(3).fill(['Electricians', 'Plumbers', 'Designers', 'Tutors', 'Carpenters', 'Mechanics', 'Developers', 'Cleaners']).flat().map((skill, i) => (
+              <span key={i} className="text-2xl md:text-3xl font-heading font-bold text-surface-200 uppercase tracking-[0.2em] whitespace-nowrap">{skill}</span>
+            ))}
           </div>
-          <p className="text-sm text-surface-500">
-            © 2026 TRABAWHO. Swipe. Match. Work.
+          <div className="flex shrink-0 gap-16 animate-marquee" aria-hidden="true">
+            {Array(3).fill(['Electricians', 'Plumbers', 'Designers', 'Tutors', 'Carpenters', 'Mechanics', 'Developers', 'Cleaners']).flat().map((skill, i) => (
+              <span key={`d-${i}`} className="text-2xl md:text-3xl font-heading font-bold text-surface-200 uppercase tracking-[0.2em] whitespace-nowrap">{skill}</span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── INTEREST: Gapless Bento Grid ─── */}
+      <section className="py-24 md:py-48 px-6 lg:px-12 bg-surface-950">
+        <div className="max-w-[1400px] mx-auto">
+          <h2 className="text-4xl md:text-6xl font-bold font-heading text-white tracking-tighter leading-none mb-16 md:mb-24 max-w-3xl text-balance">
+            The architecture of modern work
+          </h2>
+          
+          {/* 4-col gapless grid */}
+          <div className="grid grid-cols-1 md:grid-cols-4 auto-rows-[220px] border border-surface-800 rounded-[2rem] overflow-hidden bg-surface-950">
+            
+            {/* Card 1: 2x2 hero card */}
+            <div className="col-span-1 md:col-span-2 row-span-2 p-8 md:p-12 flex flex-col justify-between overflow-hidden relative group cursor-pointer border-b md:border-b-0 md:border-r border-surface-800 bg-surface-900/30 hover:bg-surface-900/80 transition-colors duration-500">
+              <div 
+                className="absolute inset-0 bg-cover bg-center opacity-[0.03] group-hover:opacity-10 mix-blend-luminosity group-hover:scale-105 transition-all duration-700 ease-out" 
+                style={{ backgroundImage: `url(${images[2]})` }}
+              />
+              <Users className="h-8 w-8 md:h-10 md:w-10 text-white relative z-10 opacity-70 group-hover:opacity-100 group-hover:text-accent transition-all duration-500" />
+              <div className="relative z-10 mt-auto transform group-hover:-translate-y-2 transition-transform duration-500 ease-out">
+                <h3 className="text-3xl md:text-4xl font-heading font-bold text-white mb-3 tracking-tight">Vetted Talent</h3>
+                <p className="text-surface-400 max-w-sm text-sm md:text-base leading-relaxed group-hover:text-surface-300 transition-colors duration-500">Access a curated network of skilled professionals across Metro Manila. Verified and ready.</p>
+              </div>
+            </div>
+            
+            {/* Card 2: 1x2 tall card */}
+            <div className="col-span-1 row-span-2 p-6 md:p-10 flex flex-col justify-between overflow-hidden relative group cursor-pointer border-b md:border-b-0 md:border-r border-surface-800 bg-surface-900/10 hover:bg-surface-900/60 transition-colors duration-500">
+              <div className="absolute top-0 right-0 p-8 transform translate-x-4 -translate-y-4 opacity-0 group-hover:opacity-10 group-hover:translate-x-0 group-hover:translate-y-0 transition-all duration-500">
+                <MessageCircle className="w-48 h-48 text-accent" />
+              </div>
+              <MessageCircle className="h-6 w-6 md:h-8 md:w-8 text-surface-500 group-hover:text-white transition-colors duration-500 relative z-10" />
+              <div className="relative z-10 transform group-hover:-translate-y-2 transition-transform duration-500 ease-out">
+                <h3 className="text-xl md:text-2xl font-heading font-bold text-white tracking-tight mb-2">Direct Chat</h3>
+                <p className="text-surface-500 text-sm leading-relaxed group-hover:text-surface-400 transition-colors duration-500">No middlemen. Coordinate timelines directly.</p>
+              </div>
+            </div>
+            
+            {/* Card 3: 1x1 */}
+            <div className="col-span-1 row-span-1 p-6 md:p-10 flex flex-col justify-between overflow-hidden relative group cursor-pointer border-b border-surface-800 bg-surface-900/10 hover:bg-surface-900/60 transition-colors duration-500">
+              <Briefcase className="h-6 w-6 md:h-8 md:w-8 text-surface-500 group-hover:text-white transition-colors duration-500 relative z-10" />
+              <h3 className="text-lg md:text-xl font-heading font-bold text-white tracking-tight relative z-10 transform group-hover:-translate-y-1 transition-transform duration-500 ease-out">Post Jobs</h3>
+            </div>
+            
+            {/* Card 4: 1x1 */}
+            <div className="col-span-1 row-span-1 p-6 md:p-10 flex flex-col justify-between overflow-hidden relative group cursor-pointer bg-surface-900/20 hover:bg-surface-900/80 transition-colors duration-500">
+              <Zap className="h-6 w-6 md:h-8 md:w-8 text-surface-500 group-hover:text-accent transition-colors duration-500 relative z-10" />
+              <h3 className="text-lg md:text-xl font-heading font-bold text-white tracking-tight relative z-10 transform group-hover:-translate-y-1 transition-transform duration-500 ease-out">Instant Match</h3>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── DESIRE: GSAP Scrubbing Text Reveal ─── */}
+      <section className="py-32 md:py-48 px-6 lg:px-12 bg-surface-950">
+        <div className="max-w-[1400px] mx-auto">
+          <div ref={scrubRef} className="max-w-4xl mx-auto">
+            <p className="text-3xl md:text-5xl font-heading font-bold leading-tight tracking-tight text-balance">
+              {scrubWords.map((word, i) => (
+                <span key={i} className="scrub-word text-white inline-block mr-[0.3em]">{word}</span>
+              ))}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── ACTION: Interactive Teaser Swiper ─── */}
+      <section className="relative bg-surface-950 border-t border-surface-800 overflow-hidden">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/2 right-0 w-[800px] h-[800px] bg-accent/5 rounded-full blur-[120px] translate-x-1/3 -translate-y-1/2" />
+        </div>
+        <div className="max-w-[1400px] mx-auto grid lg:grid-cols-2 gap-16 lg:gap-24 px-6 lg:px-12 items-center py-32 md:py-48 relative z-10">
+          
+          {/* Left Text */}
+          <div className="flex flex-col justify-center">
+            <div className="inline-block px-4 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-accent font-bold text-sm tracking-widest uppercase mb-8 w-max">
+              Try It Out
+            </div>
+            <h2 className="text-4xl md:text-6xl font-bold font-heading text-white leading-[1.1] tracking-tighter mb-8 text-balance">
+              Match with top talent in seconds.
+            </h2>
+            <p className="text-surface-400 text-lg md:text-xl max-w-lg leading-relaxed text-pretty mb-10">
+              No endless job boards. Swipe right to like a professional, swipe left to pass. If they like your job posting back, it's a match.
+            </p>
+          </div>
+
+          {/* Interactive Swiper */}
+          <div className="w-full flex justify-center lg:justify-end">
+            <TeaserSwiper />
+          </div>
+        </div>
+      </section>
+
+      {/* ─── ACTION: Massive CTA Footer ─── */}
+      <section className="py-32 md:py-48 px-6 lg:px-12 bg-surface-950 text-center">
+        <div className="max-w-[1400px] mx-auto">
+          <h2 className="text-5xl md:text-7xl font-bold font-heading text-white tracking-tighter leading-none mb-8 text-balance">
+            Ready to get started?
+          </h2>
+          <p className="text-surface-400 text-lg max-w-[45ch] mx-auto mb-14 leading-relaxed">
+            No credit card required. Setup takes 2 minutes.
           </p>
+          <Button 
+            size="lg"
+            onClick={() => navigate('/register')}
+            className="h-16 px-12 text-lg bg-white text-surface-950 hover:bg-surface-100 shadow-float"
+          >
+            Join TRABAWHO <ArrowRight className="h-5 w-5 ml-3" />
+          </Button>
+        </div>
+      </section>
+
+      {/* ─── Footer ─── */}
+      <footer className="py-12 md:py-16 px-6 lg:px-12 bg-surface-950 border-t border-surface-800">
+        <div className="max-w-[1400px] mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center">
+              <span className="text-surface-950 font-heading font-bold text-sm">T</span>
+            </div>
+            <span className="font-heading font-bold text-white text-lg tracking-tight">TRABAWHO</span>
+          </div>
+          <p className="text-surface-500 text-xs">&copy; 2026 TRABAWHO. All rights reserved.</p>
         </div>
       </footer>
-    </div>
+      
+      <style>{`
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-100%); }
+        }
+        .animate-marquee {
+          animation: marquee 25s linear infinite;
+        }
+      `}</style>
+    </main>
   );
 }

@@ -34,6 +34,7 @@ const updateMatchStatus = async (req, res) => {
     await match.update({ status: req.body.status });
     res.json({ match });
   } catch (error) {
+    console.error('Controller Error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };

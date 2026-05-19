@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { User } = require('../models');
+const { User, WorkerProfile } = require('../models');
 const { validationResult } = require('express-validator');
 
 // Register new user
@@ -25,6 +25,16 @@ const register = async (req, res) => {
       password: hashedPassword,
       role: role || 'worker',
     });
+
+    // Auto-create a WorkerProfile so new workers appear in the swipe queue
+    if ((role || 'worker') === 'worker') {
+      await WorkerProfile.create({
+        userId: user.id,
+        skills: [],
+        bio: '',
+        availability: 'available',
+      });
+    }
 
     // Generate token
     const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, {

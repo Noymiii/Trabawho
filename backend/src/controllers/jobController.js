@@ -2,10 +2,11 @@ const { Job, User } = require('../models');
 
 const createJob = async (req, res) => {
   try {
-    const { title, description, skillRequired, budget, location, schedule } = req.body;
+    const { title, description, skillRequired, budget, location, schedule, images } = req.body;
     const job = await Job.create({
       customerId: req.user.id, title, description, skillRequired,
       budget: budget ? parseFloat(budget) : null, location, schedule,
+      images: typeof images === 'string' ? JSON.parse(images) : (images || []),
     });
     res.status(201).json({ job });
   } catch (error) {
@@ -22,6 +23,7 @@ const getMyJobs = async (req, res) => {
     });
     res.json({ jobs });
   } catch (error) {
+    console.error('Controller Error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -35,6 +37,7 @@ const getAllJobs = async (req, res) => {
     });
     res.json({ jobs });
   } catch (error) {
+    console.error('Controller Error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -47,6 +50,7 @@ const getJobById = async (req, res) => {
     if (!job) return res.status(404).json({ message: 'Job not found' });
     res.json({ job });
   } catch (error) {
+    console.error('Controller Error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -58,6 +62,7 @@ const updateJob = async (req, res) => {
     await job.update(req.body);
     res.json({ job });
   } catch (error) {
+    console.error('Controller Error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -69,6 +74,7 @@ const deleteJob = async (req, res) => {
     await job.destroy();
     res.json({ message: 'Job deleted' });
   } catch (error) {
+    console.error('Controller Error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };

@@ -1,55 +1,78 @@
 @import "tailwindcss";
 
 @theme {
-  /* Color Palette - Datify Vibrant Purple */
-  --color-primary: #9333EA;
-  --color-primary-dark: #7E22CE;
-  --color-primary-light: #A855F7;
-  --color-secondary: #C084FC;
-  --color-accent: #E879F9;
-  
-  /* Surfaces - Clean Light Mode */
-  --color-surface-900: #FAFAFA;
-  --color-surface-800: #FFFFFF;
-  --color-surface-700: #F3F4F6;
-  --color-surface-600: #E5E7EB;
-  --color-surface-500: #D1D5DB;
-  --color-surface-400: #9CA3AF;
-  --color-surface-300: #6B7280;
-  --color-surface-200: #4B5563;
-  --color-surface-100: #111827;
-  --color-surface-50: #030712;
+  /* ─── Typography ─── */
+  --font-heading: 'Outfit', system-ui, sans-serif;
+  --font-body: 'Satoshi', system-ui, sans-serif;
+
+  /* ─── Color Palette: Warm Zinc + Emerald Accent ─── */
+  /* Surfaces — warm-tinted, never raw black or white */
+  --color-surface-950: oklch(0.14 0.005 162);
+  --color-surface-900: oklch(0.17 0.005 162);
+  --color-surface-800: oklch(0.22 0.005 162);
+  --color-surface-700: oklch(0.30 0.005 162);
+  --color-surface-600: oklch(0.40 0.008 162);
+  --color-surface-500: oklch(0.52 0.008 162);
+  --color-surface-400: oklch(0.62 0.008 162);
+  --color-surface-300: oklch(0.72 0.005 162);
+  --color-surface-200: oklch(0.82 0.005 162);
+  --color-surface-100: oklch(0.92 0.005 162);
+  --color-surface-50: oklch(0.97 0.003 162);
+
+  /* Primary — white-ish */
+  --color-primary: oklch(0.97 0.003 162);
+  --color-primary-light: oklch(0.85 0.005 162);
+
+  /* Accent — Emerald */
+  --color-accent: oklch(0.72 0.17 162);
+  --color-accent-light: oklch(0.78 0.14 162);
+  --color-accent-muted: oklch(0.72 0.08 162);
 
   /* Semantic */
-  --color-success: #34C759;
-  --color-warning: #FFCC00;
-  --color-danger: #FF3B30;
-  --color-info: #007AFF;
+  --color-success: oklch(0.72 0.17 162);
+  --color-warning: oklch(0.80 0.15 85);
+  --color-danger: oklch(0.63 0.20 25);
+  --color-info: oklch(0.70 0.12 240);
 
-  /* Solid Cards */
-  --color-card: #FFFFFF;
-  --color-card-border: rgba(0, 0, 0, 0.05);
+  /* Cards — dark surfaces */
+  --color-card: var(--color-surface-900);
+  --color-card-hover: var(--color-surface-850); /* we can use surface-800 or slightly brighter */
+  --color-card-border: var(--color-surface-800);
 
-  /* Typography */
-  --font-heading: 'Space Grotesk', sans-serif;
-  --font-body: 'Inter', sans-serif;
-
-  /* Border Radius */
+  /* ─── Radius ─── */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 24px;
+  --radius-2xl: 32px;
   --radius-full: 9999px;
 
-  /* Shadows - Clean & Soft */
-  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.05);
-  --shadow-card-hover: 0 8px 30px rgba(0, 0, 0, 0.1);
-  --shadow-glow-primary: 0 4px 20px rgba(147, 51, 234, 0.25);
+  /* ─── Shadows — tinted toward brand ─── */
+  --shadow-sm: 0 1px 2px oklch(0.14 0.005 162 / 0.04);
+  --shadow-card: 0 1px 3px oklch(0.14 0.005 162 / 0.04), 0 8px 24px oklch(0.14 0.005 162 / 0.03);
+  --shadow-card-hover: 0 4px 12px oklch(0.14 0.005 162 / 0.06), 0 16px 40px oklch(0.14 0.005 162 / 0.04);
+  --shadow-float: 0 8px 30px oklch(0.14 0.005 162 / 0.08), 0 24px 56px oklch(0.14 0.005 162 / 0.05);
+
+  /* ─── Easing — Emil Kowalski custom curves ─── */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
+@utility bento-dense {
+  display: grid;
+  grid-auto-flow: dense;
+}
+
+@utility text-balance {
+  text-wrap: balance;
+}
+
+@utility text-pretty {
+  text-wrap: pretty;
+}
 
 @layer base {
-  /* Base Styles */
   * {
     margin: 0;
     padding: 0;
@@ -58,106 +81,151 @@
 
   body {
     font-family: var(--font-body);
-    background-color: var(--color-surface-900);
-    color: var(--color-surface-100);
+    background-color: var(--color-surface-950);
+    color: var(--color-primary);
     min-height: 100dvh;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    line-height: 1.6;
   }
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
+    letter-spacing: -0.025em;
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--color-primary);
+  }
+
+  p {
+    letter-spacing: -0.01em;
+    max-width: 65ch;
+    color: var(--color-surface-400);
   }
 }
 
-/* Scrollbar Styling */
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--color-surface-900);
-}
-
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-surface-600);
+  background: var(--color-surface-300);
   border-radius: var(--radius-full);
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-surface-500);
+  background: var(--color-surface-400);
 }
 
 @layer components {
-  /* Card Utility */
+  /* ─── Card ─── */
   .card {
     background: var(--color-card);
     border: 1px solid var(--color-card-border);
     box-shadow: var(--shadow-card);
     border-radius: var(--radius-xl);
+    transition: box-shadow 300ms var(--ease-out), border-color 300ms var(--ease-out);
   }
 
-  /* Solid Pill Button Background */
-  .bg-primary-gradient {
-    background: linear-gradient(135deg, var(--color-primary-light), var(--color-primary));
+  @media (hover: hover) and (pointer: fine) {
+    .card:hover {
+      box-shadow: var(--shadow-card-hover);
+      border-color: var(--color-surface-300);
+    }
   }
 
-  /* Custom Scrollbar for horizontal lists */
-  .custom-scrollbar::-webkit-scrollbar {
-    height: 4px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: var(--color-surface-600);
-    border-radius: 4px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: var(--color-surface-500);
+  /* ─── Tactile button background ─── */
+  .bg-tactile-primary {
+    background: var(--color-primary);
+    box-shadow:
+      inset 0 1px 0 oklch(1 0 0 / 0.08),
+      0 1px 3px oklch(0.14 0.005 162 / 0.12);
   }
 
-  /* Gradient Text */
-  .gradient-text {
-    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  .bg-tactile-accent {
+    background: var(--color-accent);
+    box-shadow:
+      inset 0 1px 0 oklch(1 0 0 / 0.15),
+      0 1px 3px oklch(0.14 0.005 162 / 0.12);
   }
 
-  /* Gradient Background */
-  .gradient-primary {
-    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-  }
-
-  /* Swipe Card Shadows */
+  /* ─── Swipe overlays ─── */
   .swipe-card-like {
-    box-shadow: 0 0 30px rgba(34, 197, 94, 0.4);
+    box-shadow: 0 0 32px oklch(0.72 0.17 162 / 0.2);
+    border: 1px solid oklch(0.72 0.17 162 / 0.25);
   }
 
   .swipe-card-skip {
-    box-shadow: 0 0 30px rgba(239, 68, 68, 0.4);
+    box-shadow: 0 0 32px oklch(0.63 0.20 25 / 0.2);
+    border: 1px solid oklch(0.63 0.20 25 / 0.25);
+  }
+
+  /* ─── Skeleton shimmer ─── */
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--color-surface-100) 25%,
+      var(--color-surface-200) 50%,
+      var(--color-surface-100) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: var(--radius-md);
+  }
+
+  /* ─── Custom scrollbar for horizontal lists ─── */
+  .custom-scrollbar::-webkit-scrollbar { height: 3px; }
+  .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--color-surface-300);
+    border-radius: var(--radius-full);
   }
 }
 
-@layer utilities {
-  /* Pulse Animation for Match */
-  @keyframes matchPulse {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.05); opacity: 0.8; }
-  }
+/* ─── Keyframes ─── */
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
 
-  .animate-match-pulse {
-    animation: matchPulse 0.6s ease-in-out;
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-/* Fix for Webkit Autofill overriding dark theme */
+/* ─── Stagger utility ─── */
+.stagger-item {
+  opacity: 0;
+  transform: translateY(8px);
+  animation: fadeInUp 400ms var(--ease-out) forwards;
+}
+
+.stagger-item:nth-child(1) { animation-delay: 0ms; }
+.stagger-item:nth-child(2) { animation-delay: 50ms; }
+.stagger-item:nth-child(3) { animation-delay: 100ms; }
+.stagger-item:nth-child(4) { animation-delay: 150ms; }
+.stagger-item:nth-child(5) { animation-delay: 200ms; }
+.stagger-item:nth-child(6) { animation-delay: 250ms; }
+
+/* ─── Autofill fix ─── */
 input:-webkit-autofill,
-input:-webkit-autofill:hover, 
-input:-webkit-autofill:focus, 
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 30px var(--color-surface-800) inset !important;
-  -webkit-text-fill-color: var(--color-surface-100) !important;
+  -webkit-box-shadow: 0 0 0 30px var(--color-card) inset !important;
+  -webkit-text-fill-color: var(--color-surface-900) !important;
   transition: background-color 5000s ease-in-out 0s;
+}
+
+/* ─── Reduced motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  .stagger-item {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
 }

@@ -1,7 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { SocketProvider } from './contexts/SocketContext';
+import { ToastProvider } from './contexts/ToastContext';
 import { Navbar } from './components/layout/Navbar';
+import { GlobalNotificationListener } from './components/GlobalNotificationListener';
 import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -33,15 +35,18 @@ function GuestRoute({ children }: { children: ReactNode }) {
 }
 
 function AppRoutes() {
+  const { isAuthenticated } = useAuth();
   return (
     <>
       <Navbar />
+      {isAuthenticated && <GlobalNotificationListener />}
       <Routes>
         <Route path="/" element={<GuestRoute><Landing /></GuestRoute>} />
         <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
         <Route path="/register" element={<GuestRoute><Register /></GuestRoute>} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute allowedRoles={['worker']}><WorkerProfile /></ProtectedRoute>} />
+        <Route path="/profile/:id" element={<ProtectedRoute allowedRoles={['customer', 'worker']}><WorkerProfile /></ProtectedRoute>} />
         <Route path="/post-job" element={<ProtectedRoute allowedRoles={['customer']}><JobPosting /></ProtectedRoute>} />
         <Route path="/swipe" element={<ProtectedRoute allowedRoles={['customer', 'worker']}><SwipeMatch /></ProtectedRoute>} />
         <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
@@ -56,9 +61,11 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <SocketProvider>
-          <AppRoutes />
-        </SocketProvider>
+        <ToastProvider>
+          <SocketProvider>
+            <AppRoutes />
+          </SocketProvider>
+        </ToastProvider>
       </AuthProvider>
     </BrowserRouter>
   );

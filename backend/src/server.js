@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const http = require('http');
+const path = require('path');
 const { Server } = require('socket.io');
 const sequelize = require('./config/database');
 const chatHandler = require('./socket/chatHandler');
@@ -14,6 +15,9 @@ const swipeRoutes = require('./routes/swipes');
 const matchRoutes = require('./routes/matches');
 const messageRoutes = require('./routes/messages');
 const adminRoutes = require('./routes/admin');
+const uploadRoutes = require('./routes/upload');
+const reviewsRoutes = require('./routes/reviews');
+const contractRoutes = require('./routes/contract');
 
 const app = express();
 const server = http.createServer(app);
@@ -25,6 +29,7 @@ const io = new Server(server, {
     methods: ['GET', 'POST'],
   },
 });
+app.set('io', io);
 
 // Middleware
 app.use(cors({
@@ -33,6 +38,9 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve static uploaded files
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -47,6 +55,9 @@ app.use('/api/swipes', swipeRoutes);
 app.use('/api/matches', matchRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/upload', uploadRoutes);
+app.use('/api/reviews', reviewsRoutes);
+app.use('/api/contracts', contractRoutes);
 
 // Initialize Socket.io chat handler
 chatHandler(io);
@@ -66,7 +77,7 @@ async function start() {
     console.log('✅ Database connected');
 
     // Sync models (create tables if they don't exist)
-    await sequelize.sync({ alter: process.env.NODE_ENV === 'development' });
+    await sequelize.sync();
     console.log('✅ Models synced');
 
     server.listen(PORT, () => {
