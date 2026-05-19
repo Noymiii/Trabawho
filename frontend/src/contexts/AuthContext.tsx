@@ -9,6 +9,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (fullname: string, email: string, password: string, role: string) => Promise<void>;
   logout: () => void;
+  updateProfile: (fullname?: string, avatar?: string) => Promise<void>;
   isAuthenticated: boolean;
 }
 
@@ -72,6 +73,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
+  const updateProfile = async (fullname?: string, avatar?: string) => {
+    const res = await authAPI.updateProfile({ fullname, avatar });
+    const { user: newUser } = res.data;
+    localStorage.setItem('trabawho_user', JSON.stringify(newUser));
+    setUser(newUser);
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -81,6 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         register,
         logout,
+        updateProfile,
         isAuthenticated: !!token && !!user,
       }}
     >

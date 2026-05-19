@@ -45,7 +45,7 @@ function AppRoutes() {
         <Route path="/login" element={<GuestRoute><Login /></GuestRoute>} />
         <Route path="/register" element={<GuestRoute><Register /></GuestRoute>} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/profile" element={<ProtectedRoute allowedRoles={['worker']}><WorkerProfile /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute allowedRoles={['customer', 'worker']}><WorkerProfile /></ProtectedRoute>} />
         <Route path="/profile/:id" element={<ProtectedRoute allowedRoles={['customer', 'worker']}><WorkerProfile /></ProtectedRoute>} />
         <Route path="/post-job" element={<ProtectedRoute allowedRoles={['customer']}><JobPosting /></ProtectedRoute>} />
         <Route path="/swipe" element={<ProtectedRoute allowedRoles={['customer', 'worker']}><SwipeMatch /></ProtectedRoute>} />

@@ -107,17 +107,28 @@ const getQueue = async (req, res) => {
         });
       }
 
-      queue = filteredWorkers.slice(0, 20).map(w => ({
-        id: w.userId,
-        type: 'worker',
-        title: w.user.fullname,
-        subtitle: w.skills?.slice(0, 3).join(', ') || 'No skills listed',
-        description: w.bio || 'No bio provided.',
-        tags: w.skills || [],
-        location: w.location,
-        availability: w.availability,
-        images: w.images || [],
-      }));
+      queue = filteredWorkers.slice(0, 20).map(w => {
+        const imagesList = [];
+        if (w.user.avatar) {
+          imagesList.push(w.user.avatar);
+        }
+        if (w.images && w.images.length > 0) {
+          // If images is stored as a string parsed or actual array
+          const portImages = typeof w.images === 'string' ? JSON.parse(w.images) : w.images;
+          imagesList.push(...portImages);
+        }
+        return {
+          id: w.userId,
+          type: 'worker',
+          title: w.user.fullname,
+          subtitle: w.skills?.slice(0, 3).join(', ') || 'No skills listed',
+          description: w.bio || 'No bio provided.',
+          tags: w.skills || [],
+          location: w.location,
+          availability: w.availability,
+          images: imagesList,
+        };
+      });
     } else {
       // Find worker profile
       const workerProfile = await WorkerProfile.findOne({
@@ -142,17 +153,23 @@ const getQueue = async (req, res) => {
         filteredJobs = jobs.filter(j => workerSkills.includes(j.skillRequired));
       }
 
-      queue = filteredJobs.slice(0, 20).map(j => ({
-        id: j.id,
-        type: 'job',
-        title: j.title,
-        subtitle: `by ${j.customer?.fullname || 'Unknown'}`,
-        description: j.description || 'No description.',
-        tags: j.skillRequired ? [j.skillRequired] : [],
-        location: j.location,
-        budget: j.budget ? parseFloat(j.budget) : undefined,
-        images: j.images || [],
-      }));
+      queue = filteredJobs.slice(0, 20).map(j => {
+        let jobImages = [];
+        if (j.images) {
+          jobImages = typeof j.images === 'string' ? JSON.parse(j.images) : j.images;
+        }
+        return {
+          id: j.id,
+          type: 'job',
+          title: j.title,
+          subtitle: `by ${j.customer?.fullname || 'Unknown'}`,
+          description: j.description || 'No description.',
+          tags: j.skillRequired ? [j.skillRequired] : [],
+          location: j.location,
+          budget: j.budget ? parseFloat(j.budget) : undefined,
+          images: jobImages,
+        };
+      });
     }
 
     res.json({ queue });

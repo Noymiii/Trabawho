@@ -21,7 +21,24 @@ const getProfile = async (req, res) => {
       where: { userId: req.params.id },
       include: [{ model: User, as: 'user', attributes: ['id', 'fullname', 'email', 'avatar'] }],
     });
-    if (!profile) return res.status(404).json({ message: 'Profile not found' });
+    if (!profile) {
+      const user = await User.findByPk(req.params.id, {
+        attributes: ['id', 'fullname', 'email', 'avatar', 'role']
+      });
+      if (user) {
+        return res.json({
+          profile: null,
+          user: {
+            id: user.id,
+            fullname: user.fullname,
+            email: user.email,
+            avatar: user.avatar,
+            role: user.role
+          }
+        });
+      }
+      return res.status(404).json({ message: 'Profile not found' });
+    }
     res.json({ profile });
   } catch (error) {
     console.error('Controller Error:', error);

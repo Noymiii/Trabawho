@@ -41,6 +41,8 @@ export const authAPI = {
   login: (data: { email: string; password: string }) =>
     api.post('/auth/login', data),
   getMe: () => api.get('/auth/me'),
+  updateProfile: (data: { fullname?: string; avatar?: string }) =>
+    api.put('/auth/profile', data),
 };
 
 // ========== WORKERS ==========

@@ -31,9 +31,10 @@ export function Navbar() {
   const navLinks = isAuthenticated
     ? [
         { path: '/dashboard', label: 'Dashboard', icon: Home },
-        ...(user?.role === 'worker'
-          ? [{ path: '/profile', label: 'Profile', icon: User }]
-          : [{ path: '/post-job', label: 'Post Job', icon: Briefcase }]),
+        { path: '/profile', label: 'Profile', icon: User },
+        ...(user?.role === 'customer'
+          ? [{ path: '/post-job', label: 'Post Job', icon: Briefcase }]
+          : []),
         { path: '/swipe', label: 'Match', icon: Heart },
         { path: '/chat', label: 'Chat', icon: MessageCircle },
         ...(user?.role === 'admin'

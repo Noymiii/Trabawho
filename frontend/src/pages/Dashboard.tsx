@@ -30,7 +30,7 @@ export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState({ matches: 0, jobs: 0, messages: 0 });
-  const [recentMatches, setRecentMatches] = useState<Array<{ id: number; createdAt: string; worker?: { fullname: string }; customer?: { fullname: string }; job?: { title: string } }>>([]);
+  const [recentMatches, setRecentMatches] = useState<Array<{ id: number; createdAt: string; worker?: { fullname: string; avatar?: string }; customer?: { fullname: string; avatar?: string }; job?: { title: string } }>>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
 
@@ -113,7 +113,15 @@ export default function Dashboard() {
             <div className="flex items-center gap-5 relative z-10">
               <button onClick={() => navigate('/profile')} className="relative cursor-pointer group/avatar">
                 <div className="w-20 h-20 rounded-[1.25rem] bg-surface-800 flex items-center justify-center text-3xl font-bold text-white overflow-hidden transition-[border-radius,background-color] duration-500 group-hover/avatar:rounded-full group-hover/avatar:bg-accent/20">
-                  {user?.fullname?.charAt(0).toUpperCase()}
+                  {user?.avatar ? (
+                    <img 
+                      src={user.avatar.startsWith('/') ? `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}${user.avatar}` : user.avatar} 
+                      alt={user?.fullname} 
+                      className="w-full h-full object-cover" 
+                    />
+                  ) : (
+                    user?.fullname?.charAt(0).toUpperCase()
+                  )}
                 </div>
                 <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-accent rounded-full border-[3px] border-surface-900 flex items-center justify-center">
                   <Sparkles className="w-3 h-3 text-white" />
@@ -175,6 +183,7 @@ export default function Dashboard() {
               ) : recentMatches.length > 0 ? (
                 recentMatches.map((match, i) => {
                   const partnerName = user?.role === 'customer' ? match.worker?.fullname : match.customer?.fullname;
+                  const partnerAvatar = user?.role === 'customer' ? match.worker?.avatar : match.customer?.avatar;
                   return (
                     <motion.div
                       key={match.id}
@@ -184,8 +193,16 @@ export default function Dashboard() {
                       onClick={() => navigate('/chat', { state: { matchId: match.id } })}
                       className="flex items-center gap-3 cursor-pointer group/item"
                     >
-                      <div className="w-12 h-12 rounded-full bg-surface-800 border border-surface-700 flex items-center justify-center text-sm font-bold text-surface-400 group-hover/item:border-accent transition-colors duration-200">
-                        {partnerName?.[0]?.toUpperCase() || '?'}
+                      <div className="w-12 h-12 rounded-full bg-surface-800 border border-surface-700 flex items-center justify-center text-sm font-bold text-surface-400 group-hover/item:border-accent transition-colors duration-200 overflow-hidden shrink-0">
+                        {partnerAvatar ? (
+                          <img 
+                            src={partnerAvatar.startsWith('/') ? `${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}${partnerAvatar}` : partnerAvatar} 
+                            alt={partnerName} 
+                            className="w-full h-full object-cover" 
+                          />
+                        ) : (
+                          partnerName?.[0]?.toUpperCase() || '?'
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold text-white truncate group-hover/item:text-accent transition-colors duration-200">{partnerName}</p>
