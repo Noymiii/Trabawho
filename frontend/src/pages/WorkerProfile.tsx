@@ -358,21 +358,27 @@ export default function WorkerProfile() {
                       </div>
                       {isEditing && (
                         <div className="bg-surface-950 p-5 rounded-2xl border border-surface-800">
-                          <div className="flex gap-3 mb-4">
-                            <input placeholder="Type a custom skill..." value={skillInput} onChange={e => setSkillInput(e.target.value)}
-                              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addSkill(skillInput); } }} 
-                              className="flex-1 h-12 bg-surface-900 border border-surface-800 rounded-xl px-4 text-white focus:outline-none focus:border-accent" />
-                            <Button type="button" variant="secondary" className="w-12 h-12 p-0 rounded-xl bg-surface-800 text-white border-surface-700 hover:bg-surface-700" onClick={() => addSkill(skillInput)}>
-                              <Plus className="h-5 w-5" />
-                            </Button>
-                          </div>
-                          <div className="flex flex-wrap gap-2">
-                            {SKILL_OPTIONS.filter(s => !formData.skills.includes(s)).slice(0, 8).map(s => (
-                              <button key={s} type="button" onClick={() => addSkill(s)}
-                                className="text-xs px-3 py-1.5 rounded-full bg-surface-800 text-surface-400 hover:bg-accent/10 hover:text-accent border border-surface-700 transition-colors cursor-pointer">
-                                + {s}
-                              </button>
-                            ))}
+                          <p className="text-xs text-surface-400 font-medium mb-3">Choose the skills you offer from our standardized options:</p>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            {SKILL_OPTIONS.map(s => {
+                              const isSelected = formData.skills.includes(s);
+                              return (
+                                <button
+                                  key={s}
+                                  type="button"
+                                  onClick={() => isSelected ? removeSkill(s) : addSkill(s)}
+                                  className={cn(
+                                    "w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all flex items-center justify-between cursor-pointer border",
+                                    isSelected
+                                      ? "bg-white text-surface-950 border-white font-bold"
+                                      : "bg-surface-900 border-surface-800 text-surface-400 hover:bg-surface-800 hover:text-white"
+                                  )}
+                                >
+                                  <span>{s}</span>
+                                  {isSelected && <X className="w-3.5 h-3.5" />}
+                                </button>
+                              );
+                            })}
                           </div>
                         </div>
                       )}

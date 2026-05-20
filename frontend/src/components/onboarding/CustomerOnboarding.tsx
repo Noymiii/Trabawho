@@ -8,6 +8,7 @@ import { cn } from '../../lib/utils';
 const SKILL_OPTIONS = [
   'Electrician', 'Plumber', 'Tutor', 'Graphic Designer', 'Programmer',
   'Cleaner', 'Delivery Rider', 'Carpenter', 'Painter', 'Mechanic',
+  'Cook', 'Driver', 'Gardener', 'Photographer', 'Writer',
 ];
 
 const springTransition = { type: "spring", stiffness: 400, damping: 30 } as const;
@@ -170,14 +171,14 @@ export function CustomerOnboarding({ onComplete, onSkip }: CustomerOnboardingPro
                 <div className="space-y-8 mb-12">
                   <div>
                     <label className="block text-sm font-bold text-white mb-3">Primary Skill Required</label>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 max-h-56 overflow-y-auto p-2 bg-surface-900/20 border border-surface-800 rounded-2xl custom-scrollbar">
                       {SKILL_OPTIONS.map((s) => (
                         <button
                           key={s}
                           type="button"
                           onClick={() => setSkillRequired(s)}
                           className={cn(
-                            "text-sm px-5 py-3 rounded-full border transition-all font-bold cursor-pointer",
+                            "text-xs px-4 py-2.5 rounded-full border transition-all font-bold cursor-pointer",
                             skillRequired === s 
                               ? "bg-accent/10 border-accent/50 text-accent" 
                               : "bg-surface-900 text-surface-400 border-surface-800 hover:bg-surface-800 hover:text-white"
@@ -186,15 +187,6 @@ export function CustomerOnboarding({ onComplete, onSkip }: CustomerOnboardingPro
                           {s}
                         </button>
                       ))}
-                    </div>
-                    {/* Custom skill input if not in list */}
-                    <div className="mt-4 flex gap-3">
-                       <input
-                        placeholder="Or type a custom skill..."
-                        value={!SKILL_OPTIONS.includes(skillRequired) ? skillRequired : ''}
-                        onChange={(e) => setSkillRequired(e.target.value)}
-                        className="flex-1 h-14 bg-surface-900/50 border border-surface-800 rounded-xl px-5 text-white text-base placeholder:text-surface-600 focus:outline-none focus:border-accent transition-all shadow-inner"
-                      />
                     </div>
                   </div>
 

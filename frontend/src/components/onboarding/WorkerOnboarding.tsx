@@ -3,10 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../ui/Button';
 import { MapPin, Briefcase, Plus, X, ArrowRight, DollarSign } from 'lucide-react';
 import { workerAPI } from '../../services/api';
+import { cn } from '../../lib/utils';
 
 const SKILL_OPTIONS = [
   'Electrician', 'Plumber', 'Tutor', 'Graphic Designer', 'Programmer',
   'Cleaner', 'Delivery Rider', 'Carpenter', 'Painter', 'Mechanic',
+  'Cook', 'Driver', 'Gardener', 'Photographer', 'Writer',
 ];
 
 const springTransition = { type: "spring", stiffness: 400, damping: 30 } as const;
@@ -159,39 +161,21 @@ export function WorkerOnboarding({ onComplete }: WorkerOnboardingProps) {
                 <div className="mb-10">
                   <span className="text-accent font-bold tracking-widest uppercase text-xs mb-3 block">Step 2 of 3</span>
                   <h2 className="text-4xl font-bold font-heading text-white mb-3">Define your expertise</h2>
-                  <p className="text-surface-400 text-lg">Add tags that best describe the services you offer.</p>
+                  <p className="text-surface-400 text-lg">Select the standardized skills that best describe the services you offer.</p>
                 </div>
 
                 <div className="mb-12">
-                  <div className="flex gap-3 mb-6">
-                    <input
-                      autoFocus
-                      placeholder="Type a custom skill and press Enter..."
-                      value={skillInput}
-                      onChange={(e) => setSkillInput(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          addSkill(skillInput);
-                        }
-                      }}
-                      className="flex-1 h-16 bg-surface-900/50 border border-surface-800 rounded-2xl px-6 text-white text-lg placeholder:text-surface-600 focus:outline-none focus:border-accent transition-all shadow-inner"
-                    />
-                    <Button type="button" onClick={() => addSkill(skillInput)} className="w-16 h-16 p-0 rounded-2xl bg-surface-800 text-white border border-surface-700 hover:bg-surface-700">
-                      <Plus className="w-6 h-6" />
-                    </Button>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2 mb-8 p-6 bg-surface-900/30 border border-surface-800 rounded-[2rem] min-h-[100px] shadow-inner shadow-black/20">
+                  {/* Selected skills preview */}
+                  <div className="flex flex-wrap gap-2 mb-6 p-6 bg-surface-900/30 border border-surface-800 rounded-[2rem] min-h-[80px] shadow-inner shadow-black/20">
                     {skills.length === 0 ? (
-                      <span className="text-surface-500 text-base my-auto w-full text-center block">No skills added yet.</span>
+                      <span className="text-surface-500 text-base my-auto w-full text-center block italic">No skills selected yet. Select at least 1.</span>
                     ) : (
                       skills.map((skill) => (
                         <motion.span 
                           initial={{ scale: 0.8, opacity: 0 }} 
                           animate={{ scale: 1, opacity: 1 }} 
                           key={skill} 
-                          className="flex items-center gap-2 pl-5 pr-4 py-3 bg-accent/10 border border-accent/20 text-accent font-bold rounded-full text-sm"
+                          className="flex items-center gap-2 pl-5 pr-4 py-2.5 bg-accent/10 border border-accent/20 text-accent font-bold rounded-full text-sm animate-in zoom-in-75 duration-150"
                         >
                           {skill}
                           <button type="button" onClick={() => removeSkill(skill)} className="p-1 hover:bg-accent/20 rounded-full transition-colors">
@@ -202,20 +186,27 @@ export function WorkerOnboarding({ onComplete }: WorkerOnboardingProps) {
                     )}
                   </div>
 
-                  <div>
-                    <p className="text-surface-500 text-xs font-bold uppercase tracking-wider mb-4">Popular Suggestions</p>
-                    <div className="flex flex-wrap gap-2">
-                      {SKILL_OPTIONS.filter((s) => !skills.includes(s)).map((s) => (
+                  {/* Skills Selection Grid */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-72 overflow-y-auto p-2 bg-surface-900/10 border border-surface-800 rounded-[2rem] custom-scrollbar">
+                    {SKILL_OPTIONS.map((s) => {
+                      const isSelected = skills.includes(s);
+                      return (
                         <button
                           key={s}
                           type="button"
-                          onClick={() => addSkill(s)}
-                          className="text-sm px-5 py-2.5 rounded-full bg-surface-900 text-surface-400 hover:bg-surface-800 hover:text-white border border-surface-800 transition-all font-medium"
+                          onClick={() => isSelected ? removeSkill(s) : addSkill(s)}
+                          className={cn(
+                            "w-full text-left px-4 py-3 rounded-2xl text-xs font-semibold transition-all flex items-center justify-between cursor-pointer border",
+                            isSelected
+                              ? "bg-white text-surface-950 border-white font-bold"
+                              : "bg-surface-900/50 border-surface-800 text-surface-400 hover:bg-surface-800 hover:text-white"
+                          )}
                         >
-                          + {s}
+                          <span>{s}</span>
+                          {isSelected && <X className="w-3.5 h-3.5" />}
                         </button>
-                      ))}
-                    </div>
+                      );
+                    })}
                   </div>
                 </div>
 
