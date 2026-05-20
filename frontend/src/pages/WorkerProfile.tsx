@@ -137,7 +137,6 @@ export default function WorkerProfile() {
   const addSkill = (skill: string) => {
     const t = skill.trim();
     if (t && !formData.skills.includes(t)) setFormData(p => ({ ...p, skills: [...p.skills, t] }));
-    setSkillInput('');
   };
 
   const removeSkill = (skill: string) => {
