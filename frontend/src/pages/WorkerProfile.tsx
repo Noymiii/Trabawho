@@ -5,7 +5,7 @@ import { workerAPI, reviewAPI, jobAPI } from '../services/api';
 import { Button } from '../components/ui/Button';
 import { ImageUpload } from '../components/ui/ImageUpload';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Clock, Phone, Plus, X, Save, Briefcase, Star, ArrowLeft, Calendar, DollarSign } from 'lucide-react';
+import { MapPin, Clock, Phone, X, Save, Briefcase, Star, ArrowLeft, Calendar, DollarSign } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 const SKILL_OPTIONS = [
@@ -36,7 +36,6 @@ export default function WorkerProfile() {
   });
   const [fullnameInput, setFullnameInput] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
-  const [skillInput, setSkillInput] = useState('');
   const [message, setMessage] = useState({ type: '', text: '' });
 
   // Reviews Data

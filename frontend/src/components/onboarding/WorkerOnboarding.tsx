@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../ui/Button';
-import { MapPin, Briefcase, Plus, X, ArrowRight, DollarSign } from 'lucide-react';
+import { MapPin, Briefcase, X, ArrowRight, DollarSign } from 'lucide-react';
 import { workerAPI } from '../../services/api';
 import { cn } from '../../lib/utils';
 
@@ -31,7 +31,6 @@ export function WorkerOnboarding({ onComplete }: WorkerOnboardingProps) {
   const [location, setLocation] = useState('');
   const [hourlyRate, setHourlyRate] = useState('');
   const [skills, setSkills] = useState<string[]>([]);
-  const [skillInput, setSkillInput] = useState('');
   const [bio, setBio] = useState('');
 
   const nextStep = () => setStep((s) => s + 1);
@@ -40,7 +39,6 @@ export function WorkerOnboarding({ onComplete }: WorkerOnboardingProps) {
   const addSkill = (skill: string) => {
     const t = skill.trim();
     if (t && !skills.includes(t)) setSkills([...skills, t]);
-    setSkillInput('');
   };
 
   const removeSkill = (skill: string) => {
