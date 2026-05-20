@@ -87,7 +87,9 @@ const getQueue = async (req, res) => {
         where: { customerId: userId, status: 'open' },
         attributes: ['skillRequired']
       });
-      const requiredSkills = customerJobs.map(j => j.skillRequired).filter(Boolean);
+      const requiredSkills = customerJobs.flatMap(j => 
+        j.skillRequired ? j.skillRequired.split(',').map(s => s.trim()) : []
+      ).filter(Boolean);
 
       // Customers see available workers they haven't swiped on
       const workers = await WorkerProfile.findAll({
@@ -150,7 +152,11 @@ const getQueue = async (req, res) => {
       // Filter jobs by matching skills if the worker profile has skills specified
       let filteredJobs = jobs;
       if (workerSkills && workerSkills.length > 0) {
-        filteredJobs = jobs.filter(j => workerSkills.includes(j.skillRequired));
+        filteredJobs = jobs.filter(j => {
+          if (!j.skillRequired) return false;
+          const skills = j.skillRequired.split(',').map(s => s.trim());
+          return skills.some(s => workerSkills.includes(s));
+        });
       }
 
       queue = filteredJobs.slice(0, 20).map(j => {
@@ -164,7 +170,7 @@ const getQueue = async (req, res) => {
           title: j.title,
           subtitle: `by ${j.customer?.fullname || 'Unknown'}`,
           description: j.description || 'No description.',
-          tags: j.skillRequired ? [j.skillRequired] : [],
+          tags: j.skillRequired ? j.skillRequired.split(',').map(s => s.trim()) : [],
           location: j.location,
           budget: j.budget ? parseFloat(j.budget) : undefined,
           images: jobImages,

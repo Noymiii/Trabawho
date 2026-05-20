@@ -101,6 +101,7 @@ async function start() {
     await sequelize.sync();
     console.log('✅ Models synced');
 
+    // Start listening on port 5001 now!
     server.listen(PORT, () => {
       console.log(`\n🚀 TRABAWHO API running on http://localhost:${PORT}`);
       console.log(`📡 Socket.io ready for connections`);
